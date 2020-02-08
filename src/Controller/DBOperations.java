@@ -123,7 +123,7 @@ public class DBOperations {
 
 
 
-    //----------------------------Edition---------------------------------------
+    //----------------------------EditionName---------------------------------------
 
     public ObservableList<String> getEditionNameByGameId(Integer gameId) {
         ObservableList<String> List = FXCollections.observableArrayList();

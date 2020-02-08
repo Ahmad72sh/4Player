@@ -18,7 +18,7 @@ public class Games {
     private String Name;
     private String PlatiURL;
     private String SteamDBURL;
-    @OneToMany(mappedBy = "game" ,cascade=CascadeType.REMOVE)
+    @OneToMany(mappedBy = "game" ,cascade=CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Edition> editionList = new ArrayList();
     private Boolean isActive;
 

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -463,14 +464,118 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <StackPane fx:id="spUpdateSitePrices" layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: rgba(0,0,0,0.5);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="spUpdateSitePrices" layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: rgba(0,0,0,0.5);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane maxHeight="200.0" maxWidth="400.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 10;" visible="false" />
+            <AnchorPane maxWidth="700.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 20 20 10 10;">
+               <children>
+                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" style="-fx-background-radius: 10;" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                      <AnchorPane minHeight="160.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <TableView fx:id="tvAvailableItem" editable="true" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="35.0">
+                                <columns>
+                                  <TableColumn fx:id="col_A_GameName" editable="false" maxWidth="1.7976931348623157E308" minWidth="120.0" prefWidth="120.0" text="Game Name" />
+                                  <TableColumn fx:id="col_A_EditionName" editable="false" minWidth="120.0" prefWidth="120.0" text="Edition Name" />
+                                    <TableColumn fx:id="col_A_PriceDollar" editable="false" minWidth="120.0" prefWidth="120.0" text="Price (Dollar)" />
+                                    <TableColumn fx:id="col_A_PriceToman" minWidth="120.0" prefWidth="120.0" text="Price (Toman)" />
+                                </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                                 <padding>
+                                    <Insets bottom="-2.0" left="-2.0" right="-2.0" top="-2.0" />
+                                 </padding>
+                              </TableView>
+                              <Label layoutX="30.0" layoutY="15.0" text="Available Items:" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="5.0" />
+                              <AnchorPane maxHeight="40.0" minHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <JFXButton focusTraversable="false" graphicTextGap="10.0" layoutX="61.0" layoutY="1.0" maxHeight="30.0" minHeight="30.0" onAction="#moveToAvailableList" prefWidth="230.0" style="-fx-background-color: linear-gradient(#18ce9a, #4edc53); -fx-background-radius: 20;" text="Move item to available" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="7.0">
+                                       <padding>
+                                          <Insets top="-2.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="25.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-5.0" translateY="1.0">
+                                             <image>
+                                                <Image url="@resources/arrow-bold.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </JFXButton>
+                                    <JFXButton focusTraversable="false" graphicTextGap="10.0" layoutX="249.0" layoutY="7.0" maxHeight="30.0" minHeight="30.0" onAction="#moveToUnavailableList" prefWidth="230.0" style="-fx-background-color: #F7B733; -fx-background-radius: 20;" text="Move item to unavailable" AnchorPane.rightAnchor="110.0">
+                                       <padding>
+                                          <Insets top="-2.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="25.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" rotate="180.0" translateY="2.0">
+                                             <image>
+                                                <Image url="@resources/arrow-bold.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </JFXButton>
+                                 </children>
+                              </AnchorPane>
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="160.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <TableView fx:id="tvUnavailableItem" editable="true" prefWidth="200.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="35.0">
+                                 <columns>
+                                    <TableColumn fx:id="col_U_GameName" editable="false" maxWidth="1.7976931348623157E308" minWidth="120.0" prefWidth="120.0" text="Game Name" />
+                                    <TableColumn fx:id="col_U_EditionName" editable="false" minWidth="120.0" prefWidth="120.0" text="Edition Name" />
+                                    <TableColumn fx:id="col_U_PriceDollar" editable="false" minWidth="120.0" prefWidth="120.0" text="Price (Dollar)" />
+                                    <TableColumn fx:id="col_U_PriceToman" minWidth="120.0" prefWidth="120.0" text="Price (Toman)" />
+                                 </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                                 <padding>
+                                    <Insets bottom="-2.0" left="-2.0" right="-2.0" top="-2.0" />
+                                 </padding>
+                              </TableView>
+                              <Label text="Unavailable Items:" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="5.0" />
+                           </children>
+                        </AnchorPane>
+                    </items>
+                  </SplitPane>
+                  <Label text="Enter Dollar Price (Toman):" visible="false" />
+                  <JFXButton fx:id="btnUpdateSitePrice" focusTraversable="false" layoutX="14.0" layoutY="440.0" maxHeight="30.0" minHeight="30.0" onAction="#updateAllSitePrices" prefWidth="110.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Update List" textFill="WHITE" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="20.0">
+                     <padding>
+                        <Insets top="-2.0" />
+                     </padding></JFXButton>
+                  <JFXButton fx:id="btnCancelUpdateSitePrice" focusTraversable="false" layoutX="310.0" layoutY="453.0" maxHeight="30.0" minHeight="30.0" onAction="#cancelUpdateSitePrices" prefWidth="90.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Cancel" textFill="WHITE" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="150.0">
+                     <padding>
+                        <Insets top="-2.0" />
+                     </padding></JFXButton>
+                  <TextField fx:id="tfDollarPrice" prefWidth="120.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-radius: 4; -fx-border-width: 0.5;" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="390.0" />
+                  <Label layoutX="422.0" layoutY="456.0" text="Enter Dollar Prices:" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="260.0" />
+                  <JFXButton focusTraversable="false" layoutX="160.0" layoutY="463.0" maxHeight="30.0" minHeight="30.0" onAction="#FinalUpdateSitePrice" prefWidth="150.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Update Site DB" textFill="WHITE" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="20.0">
+                     <padding>
+                        <Insets top="-2.0" />
+                     </padding>
+                  </JFXButton>
+               </children>
+               <StackPane.margin>
+                  <Insets bottom="60.0" top="50.0" />
+               </StackPane.margin>
+            </AnchorPane>
+         </children>
+      </StackPane>
+      <StackPane fx:id="spAddToAvailable" layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: rgba(0,0,0,0.5);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <AnchorPane maxHeight="200.0" maxWidth="400.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                <children>
-                  <JFXButton fx:id="btnUpdateSitePrice" focusTraversable="false" onAction="#updateAllSitePrices" prefWidth="150.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Update Prices" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="40.0" />
-                  <JFXButton fx:id="btnCancelUpdateSitePrice" focusTraversable="false" layoutX="301.0" layoutY="243.0" onAction="#cancelUpdateSitePrices" prefWidth="150.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Cancel" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="40.0" />
-                  <Label layoutX="38.0" layoutY="30.0" text="Enter Dollar Price (Toman):" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="30.0" />
-                  <TextField fx:id="tfDollarPrice" layoutX="40.0" layoutY="78.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-radius: 4; -fx-border-width: 0.5;" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="70.0" />
+                  <JFXButton onAction="#addToAvailable" prefWidth="150.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Add" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="40.0" />
+                  <JFXButton layoutX="301.0" layoutY="243.0" onAction="#cancelAddToAvailable" prefWidth="150.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Cancel" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="40.0" />
+                  <Label layoutX="325.0" layoutY="52.0" text="Item Prices:" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="30.0" />
+                  <TextField fx:id="tfItemPrice" layoutX="40.0" layoutY="78.0" minHeight="33.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-radius: 4; -fx-border-width: 0.5; -fx-prompt-text-fill: RED;" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="70.0">
+                     <padding>
+                        <Insets left="50.0" />
+                     </padding>
+                  </TextField>
+                  <JFXToggleButton fx:id="tbPriceType" layoutX="210.0" layoutY="10.0" maxHeight="40.0" minHeight="40.0" text="Enter Price By Toman" toggleColor="WHITE" toggleLineColor="#12d722" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="23.0" />
+                  <Label fx:id="lblPriceType" layoutX="46.0" layoutY="76.0" text="Dollar:" AnchorPane.leftAnchor="45.0" AnchorPane.topAnchor="73.0" />
                </children>
             </AnchorPane>
          </children>

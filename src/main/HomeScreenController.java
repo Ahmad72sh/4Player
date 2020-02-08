@@ -13,6 +13,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -25,10 +26,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import main.TableObjacts.EditionObject;
-import main.TableObjacts.GameTableObject;
-import main.TableObjacts.GamesList;
-import main.TableObjacts.TableList;
+import main.TableObjacts.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -106,6 +104,21 @@ public class HomeScreenController implements Initializable {
     public TextField tfDollarPrice;
     public JFXButton btnUpdateSitePrice;
     public JFXButton btnCancelUpdateSitePrice;
+    public TableView<UpdateProduct> tvUnavailableItem;
+    public TableColumn<UpdateProduct, String> col_U_GameName;
+    public TableColumn<UpdateProduct, String> col_U_EditionName;
+    public TableColumn<UpdateProduct, String> col_U_PriceDollar;
+    public TableColumn<UpdateProduct, String> col_U_PriceToman;
+    public TableView<UpdateProduct> tvAvailableItem;
+    public TableColumn<UpdateProduct, String> col_A_GameName;
+    public TableColumn<UpdateProduct, String> col_A_EditionName;
+    public TableColumn<UpdateProduct, String> col_A_PriceDollar;
+    public TableColumn<UpdateProduct, String> col_A_PriceToman;
+    public StackPane spAddToAvailable;
+    public TextField tfItemPrice;
+    public JFXToggleButton tbPriceType;
+    public Label lblPriceType;
+    public UpdateProduct updateProductInstance = null;
 
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -116,16 +129,57 @@ public class HomeScreenController implements Initializable {
         updateRegionList();
         updateGamesList();
 
+        tfDollarPrice.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.isEmpty()) {
+                for (UpdateProduct updateProduct : tvAvailableItem.getItems()) {
+                    if (updateProduct.getPriceDollar() != null){
+                        float price;
+                        if (Double.parseDouble(updateProduct.getPriceDollar()) < 10) {
+                            price = Math.round(Float.parseFloat(updateProduct.getPriceDollar()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else if (Double.parseDouble(updateProduct.getPriceDollar()) < 20) {
+                            price = Math.round(Float.parseFloat(updateProduct.getPriceDollar()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else if (Double.parseDouble(updateProduct.getPriceDollar()) < 40) {
+                            price = Math.round(Float.parseFloat(updateProduct.getPriceDollar()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else {
+                            price = Math.round(Float.parseFloat(updateProduct.getPriceDollar()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        }
+                        updateProduct.PriceToman.setValue(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                    }
+                }
+            }
+        });
+
+        tbPriceType.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue){
+                lblPriceType.setText("Toman:");
+                tfItemPrice.setPadding(new Insets(0,0,0,60));
+                if (updateProductInstance!=null){
+                    if (updateProductInstance.getPriceToman()!= null) {
+                        tfItemPrice.setText(updateProductInstance.getPriceToman());
+                    }
+                }
+            } else {
+                lblPriceType.setText("Dollar:");
+                tfItemPrice.setPadding(new Insets(0,0,0,50));
+            }
+        });
+
         forceTextFieldToBeNumericOnly(tfPostId);
         forceTextFieldToBeNumericOnly(tfEditionId);
         forceTextFieldToBeNumericOnly(tfDollarPrice);
+        forceTextFieldToBeNumericOnly(tfItemPrice);
 
-        initEditionTableView();
+        initTableViews();
 
     }
 
-    private void initEditionTableView() {
+    private void initTableViews() {
 
+        //----------EditionName Table------------------
         tvEdition.setEditable(true);
 
         colEditionName.setCellValueFactory(param -> param.getValue().EditionTitle);
@@ -149,7 +203,24 @@ public class HomeScreenController implements Initializable {
             Platform.runLater(() ->
                     tvEdition.getItems().get(event.getTablePosition().getRow()).setEditionID(event.getNewValue()));
         }).start());
+
+        //-------------availableProduct-----------------------
+        col_A_EditionName.setCellValueFactory(param -> param.getValue().EditionName);
+        col_A_GameName.setCellValueFactory(new PropertyValueFactory<>("GameName"));
+        col_A_PriceDollar.setCellValueFactory(param -> param.getValue().PriceDollar);
+        col_A_PriceToman.setCellValueFactory(param -> param.getValue().PriceToman);
+        col_A_PriceToman.setCellFactory(TextFieldTableCell.forTableColumn());
+        col_A_PriceToman.setOnEditCommit(event -> tvAvailableItem.getItems().get(event.getTablePosition().getRow()).setPriceToman(event.getNewValue()));
+
+        //-------------availableProduct-----------------------
+        col_U_EditionName.setCellValueFactory(param -> param.getValue().EditionName);
+        col_U_GameName.setCellValueFactory(new PropertyValueFactory<>("GameName"));
+        col_U_PriceDollar.setCellValueFactory(param -> param.getValue().PriceDollar);
+        col_U_PriceToman.setCellValueFactory(param -> param.getValue().PriceToman);
+        col_U_PriceToman.setCellFactory(TextFieldTableCell.forTableColumn());
+        col_U_PriceToman.setOnEditCommit(event -> tvUnavailableItem.getItems().get(event.getTablePosition().getRow()).setPriceToman(event.getNewValue()));
     }
+
 
     private void updateGamesList() {
         games.clear();
@@ -261,11 +332,14 @@ public class HomeScreenController implements Initializable {
             saleTypeList.clear();
             saleTypeList.addAll(dbOperations.getAllSaleType());
             for (Games g : games) {
-                gamesList.add(new GamesList(g.getName(),Integer.toString(g.getId()), g.getPlatiURL(), g.getSteamDBURL(), g.getPostId()));
-            }
-            for (GamesList gL : gamesList) {
+                gamesList.add(new GamesList(g.getName(), Integer.toString(g.getId()), g.getPlatiURL(), g.getSteamDBURL(), g.getPostId()));
+//            }
+//            for (GamesList gL : gamesList) {
 
-                List<Edition> editions = dbOperations.getEditionByGameId(Integer.parseInt(gL.GameId.get()));
+
+                GamesList gL = new GamesList(g.getName(), Integer.toString(g.getId()), g.getPlatiURL(), g.getSteamDBURL(), g.getPostId());
+//                List<EditionName> editions = dbOperations.getEditionByGameId(Integer.parseInt(gL.GameId.get()));
+                List<Edition> editions = g.getEditionList();
                 ObservableList<String> editionList = FXCollections.observableArrayList();
                 for (Edition edition : editions) {
                     editionList.add(edition.getName());
@@ -399,7 +473,7 @@ public class HomeScreenController implements Initializable {
                         TableColumn<GameTableObject, String> colLanguage = new TableColumn<>("Language");
                         TableColumn<GameTableObject, String> colPlatform = new TableColumn<>("Platform");
                         TableColumn<GameTableObject, String> colKind = new TableColumn<>("Kind");
-                        TableColumn<GameTableObject, String> colEdition = new TableColumn<>("Edition");
+                        TableColumn<GameTableObject, String> colEdition = new TableColumn<>("EditionName");
                         TableColumn<GameTableObject, Boolean> colDefaultForSale = new TableColumn<>("Default For Sale");
 
                         colItemName.setCellValueFactory(new PropertyValueFactory<>("ItemName"));
@@ -522,11 +596,12 @@ public class HomeScreenController implements Initializable {
                                     savedPricesLists.stream().filter(priceLists -> priceLists.getPlatiItemURL().equals(ItemURL)).findFirst().get() : null;
                             if (pl != null) {
 
-                                GameTableObject gameTableObject = new GameTableObject(gL.getGamePostId(),creatHyperlink(itemName, ItemURL), sellerName, sellerRate, soldCont, price);
+                                GameTableObject gameTableObject = new GameTableObject(gL.getGamePostId(), creatHyperlink(itemName, ItemURL), sellerName, sellerRate, soldCont, price);
                                 gameTableObject.setRegion(pl.getRegion());
                                 gameTableObject.setLanguage(pl.getLanguage());
                                 gameTableObject.setPlatform(pl.getPlatform());
                                 gameTableObject.setKind(pl.getKind());
+                                if (pl.getEditionName() != null) gameTableObject.setEdition(pl.getEditionName());
                                 if (pl.getEditionID() != null) gameTableObject.setEditionID(pl.getEditionID());
                                 gameTableObject.setSetDefault(pl.isDefaultForSale());
 
@@ -540,27 +615,27 @@ public class HomeScreenController implements Initializable {
 
 
                             } else {
-                                GameTableObject gameTableObject = new GameTableObject(gL.getGamePostId(),creatHyperlink(itemName, ItemURL), sellerName, sellerRate, soldCont, price);
+                                GameTableObject gameTableObject = new GameTableObject(gL.getGamePostId(), creatHyperlink(itemName, ItemURL), sellerName, sellerRate, soldCont, price);
 
                                 //Automatic Set Editions
-                                for (Edition ed : editions.stream().sorted(Comparator.comparing(edition -> edition.getName())).collect(Collectors.toList())){
-                                    if (tableList.getName().contains(ed.getName())){
+                                for (Edition ed : editions.stream().sorted(Comparator.comparing(edition -> edition.getName())).collect(Collectors.toList())) {
+                                    if (tableList.getName().contains(ed.getName())) {
                                         gameTableObject.setEdition(ed.getName());
                                         gameTableObject.setEditionID(ed.getPostId());
                                     }
                                 }
 
                                 //Automatic set Platform
-                                for (String p : platformList){
-                                    if (tableList.getName().contains(p)){
+                                for (String p : platformList) {
+                                    if (tableList.getName().contains(p)) {
                                         gameTableObject.setPlatform(p);
                                     }
                                 }
 
 
                                 //Automatic set Kind
-                                for (String k : kindList){
-                                    if (tableList.getName().contains(k)){
+                                for (String k : kindList) {
+                                    if (tableList.getName().contains(k)) {
                                         gameTableObject.setKind(k);
                                     }
                                 }
@@ -754,7 +829,7 @@ public class HomeScreenController implements Initializable {
                         pL.setLanguage(g.getLanguage());
                         pL.setPlatform(g.getPlatform());
                         pL.setKind(g.getKind());
-                        if (g.getEditionID()!= 0) pL.setEditionID(g.getEditionID());
+                        if (g.getEditionID() != 0) pL.setEditionID(g.getEditionID());
                         pL.setDefaultForSale(g.isSetDefault());
                         pL.setEditionName(g.getEdition());
 
@@ -769,7 +844,7 @@ public class HomeScreenController implements Initializable {
                             dP.setLanguage(g.getLanguage());
                             dP.setPlatform(g.getPlatform());
                             dP.setKind(g.getKind());
-                            if (g.getEditionID()!= 0) dP.setEditionID(g.getEditionID());
+                            if (g.getEditionID() != 0) dP.setEditionID(g.getEditionID());
                             dP.setEditionName(g.getEdition());
                             dP.setGameName(tp.getText());
 
@@ -1280,7 +1355,7 @@ public class HomeScreenController implements Initializable {
             JFXDialogLayout jfxDialogLayout = new JFXDialogLayout();
             JFXDialog myDialog = new JFXDialog(spAddEdition, jfxDialogLayout, JFXDialog.DialogTransition.CENTER);
             myDialog.transitionTypeProperty().set(JFXDialog.DialogTransition.NONE);
-            Text dialogTitle = new Text("Delete Edition!");
+            Text dialogTitle = new Text("Delete EditionName!");
             dialogTitle.setStyle("-fx-font-weight: bold !important; -fx-font-size: 18;");
             jfxDialogLayout.setHeading(dialogTitle);
             jfxDialogLayout.setBody(new Text("Are you sure to delete \"" + tvEdition.getSelectionModel().getSelectedItem().getEditionTitle() + "\" ?"));
@@ -1325,8 +1400,8 @@ public class HomeScreenController implements Initializable {
     public void AddEdition(ActionEvent actionEvent) {
 
         Platform.runLater(() -> {
-            tfEditionTitle.setPromptText((tfEditionTitle.getText().isEmpty()) ? "Enter Edition Title" : "");
-            tfEditionId.setPromptText((tfEditionId.getText().isEmpty()) ? "Enter Edition ID" : "");
+            tfEditionTitle.setPromptText((tfEditionTitle.getText().isEmpty()) ? "Enter EditionName Title" : "");
+            tfEditionId.setPromptText((tfEditionId.getText().isEmpty()) ? "Enter EditionName ID" : "");
 
             if (!tfEditionTitle.getText().isEmpty() && !tfEditionId.getText().isEmpty()) {
                 new Thread(() -> {
@@ -1373,6 +1448,179 @@ public class HomeScreenController implements Initializable {
 
     public void updateAllSitePrices(ActionEvent actionEvent) {
 
+        //TODO: تنظیم آیتم های ناموجود و موجود در جدول هایشان
+        List<Games> games = dbOperations.getAllGames();
+        List<DefaultPrices> dP = dbOperations.getAllDefaultPrices();
+
+        tvAvailableItem.getItems().clear();
+        tvUnavailableItem.getItems().clear();
+        for (Games game : games) {
+            // اگر بازی در لیست قیمت های موجود قرار داشت
+            if (dP.stream().anyMatch(defaultPrices -> defaultPrices.getGameID().equals(game.getPostId()))) {
+                // اگر بازی در لیست قیمت بود ولی دارای ادیشن نبود
+                if (game.getEditionList().size() == 0) {
+                    DefaultPrices myDp = dP.stream().filter(defaultPrices -> defaultPrices.getGameID().equals(game.getPostId())).findAny().get();
+                    UpdateProduct updateProduct = new UpdateProduct(myDp.getGameID(), creatHyperlink(game.getName(),
+                            game.getPlatiURL()), myDp.getPrice(), null, myDp.getRegion(), myDp.getLanguage(),
+                            myDp.getPlatform(), myDp.getKind(), myDp.getEditionName(), (myDp.getEditionID() != null) ? myDp.getEditionID() : 0L);
+
+                    // تنظیم قیمت به تومان در صورتی که تکست فیلد قیمت دلار خالی نباشد
+                    if (!tfDollarPrice.getText().isEmpty()) {
+                        float price;
+                        if (Double.parseDouble(myDp.getPrice()) < 10) {
+                            price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else if (Double.parseDouble(myDp.getPrice()) < 20) {
+                            price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else if (Double.parseDouble(myDp.getPrice()) < 40) {
+                            price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        } else {
+                            price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                            price = price * 1000;
+                        }
+                        updateProduct.setPriceToman(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                    }
+
+                    tvAvailableItem.getItems().add(updateProduct);
+                // اگر بازی در لیست قیمت بود و دارای ادیشن بود
+                } else {
+                    for (Edition edition : game.getEditionList()) {
+                        if (dP.stream().anyMatch(defaultPrices -> String.valueOf(defaultPrices.getEditionID()).equals(String.valueOf(edition.getPostId())))) {
+                            DefaultPrices myDp = dP.stream().filter(defaultPrices -> String.valueOf(defaultPrices.getEditionID()).equals(String.valueOf(edition.getPostId()))).findAny().get();
+                            UpdateProduct updateProduct = new UpdateProduct(myDp.getGameID(), creatHyperlink(game.getName(),
+                                    game.getPlatiURL()), myDp.getPrice(), null, myDp.getRegion(), myDp.getLanguage(),
+                                    myDp.getPlatform(), myDp.getKind(), myDp.getEditionName(), myDp.getEditionID());
+
+                            // تنظیم قیمت به تومان در صورتی که تکست فیلد قیمت دلار خالی نباشد
+                            if (!tfDollarPrice.getText().isEmpty()) {
+                                float price;
+                                if (Double.parseDouble(myDp.getPrice()) < 10) {
+                                    price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                                    price = price * 1000;
+                                } else if (Double.parseDouble(myDp.getPrice()) < 20) {
+                                    price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                                    price = price * 1000;
+                                } else if (Double.parseDouble(myDp.getPrice()) < 40) {
+                                    price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                                    price = price * 1000;
+                                } else {
+                                    price = Math.round(Float.parseFloat(myDp.getPrice()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                                    price = price * 1000;
+                                }
+                                updateProduct.setPriceToman(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                            }
+
+                            tvAvailableItem.getItems().add(updateProduct);
+                        // اگر یک یا چند ادیشن بازی در لیست قیمت های موجود نبود
+                        } else {
+                            UpdateProduct updateProduct = new UpdateProduct(game.getPostId(), creatHyperlink(game.getName(),
+                                    game.getPlatiURL()), null, null, null, null,
+                                    null, null, edition.getName(), edition.getPostId());
+
+                            tvUnavailableItem.getItems().add(updateProduct);
+                        }
+                    }
+                }
+
+            // اگر بازی در لیست قیمت ها نبود
+            } else {
+
+                //اگر بازی که در لیست قیمت ها نیست ادیشن نداشت
+                if (game.getEditionList().size() == 0) {
+                    UpdateProduct updateProduct = new UpdateProduct(game.getPostId(), creatHyperlink(game.getName(),
+                            game.getPlatiURL()), null, null, null, null,
+                            null, null, null, null);
+                    tvUnavailableItem.getItems().add(updateProduct);
+
+                // اگر بازی کع در لیست قیمت ها نیست ادیشن داشت
+                } else {
+                    for (Edition edition : game.getEditionList()) {
+
+                        UpdateProduct updateProduct = new UpdateProduct(game.getPostId(), creatHyperlink(game.getName(),
+                                game.getPlatiURL()), null, null, null, null,
+                                null, null, edition.getName(), edition.getPostId());
+
+                        tvUnavailableItem.getItems().add(updateProduct);
+                    }
+
+                }
+            }
+        }
+    }
+
+    public void cancelUpdateSitePrices(ActionEvent actionEvent) {
+
+        spUpdateSitePrices.setVisible(false);
+        tfDollarPrice.setText("");
+        tfDollarPrice.setPromptText("");
+        tvAvailableItem.getItems().clear();
+        tvUnavailableItem.getItems().clear();
+
+    }
+
+    public void updateSitePrices(ActionEvent actionEvent) {
+        spUpdateSitePrices.setVisible(true);
+    }
+
+    public void moveToAvailableList(ActionEvent actionEvent) {
+        spAddToAvailable.setVisible(true);
+    }
+
+    public void moveToUnavailableList(ActionEvent actionEvent) {
+        if (!tvAvailableItem.getSelectionModel().isEmpty()){
+            tvUnavailableItem.getItems().add(tvAvailableItem.getSelectionModel().getSelectedItem());
+            tvAvailableItem.getItems().remove(tvAvailableItem.getSelectionModel().getSelectedItem());
+        }else {
+            dialogBox(spUpdateSitePrices,"Error","Select an item first.");
+        }
+    }
+
+    public void addToAvailable(ActionEvent actionEvent) {
+        if (!tfItemPrice.getText().isEmpty()){
+            updateProductInstance = tvUnavailableItem.getSelectionModel().getSelectedItem();
+            if (tbPriceType.isSelected()){
+                updateProductInstance.setPriceToman(tfItemPrice.getText());
+            } else {
+                updateProductInstance.setPriceDollar(tfItemPrice.getText());
+                if (!tfDollarPrice.getText().isEmpty()){
+                    float price;
+                    if (Double.parseDouble(tfItemPrice.getText()) < 10) {
+                        price = Math.round(Float.parseFloat(tfItemPrice.getText()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                        price = price * 1000;
+                    } else if (Double.parseDouble(tfItemPrice.getText()) < 20) {
+                        price = Math.round(Float.parseFloat(tfItemPrice.getText()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                        price = price * 1000;
+                    } else if (Double.parseDouble(tfItemPrice.getText()) < 40) {
+                        price = Math.round(Float.parseFloat(tfItemPrice.getText()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                        price = price * 1000;
+                    } else {
+                        price = Math.round(Float.parseFloat(tfItemPrice.getText()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
+                        price = price * 1000;
+                    }
+                    updateProductInstance.setPriceToman(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                }
+            }
+
+            tvUnavailableItem.getItems().remove(updateProductInstance);
+            tvAvailableItem.getItems().add(updateProductInstance);
+            tfItemPrice.setPromptText("");
+            spAddToAvailable.setVisible(false);
+            tfItemPrice.setText("");
+
+        } else {
+            tfItemPrice.setPromptText("Enter item prices");
+        }
+    }
+
+    public void cancelAddToAvailable(ActionEvent actionEvent) {
+        tfItemPrice.setPromptText("");
+        spAddToAvailable.setVisible(false);
+        tfItemPrice.setText("");
+    }
+
+    public void FinalUpdateSitePrice(ActionEvent actionEvent) {
         new Thread(()->{
             Platform.runLater(()-> tfDollarPrice.setPromptText((tfDollarPrice.getText().isEmpty()) ? "Enter Dollar Price" : ""));
 
@@ -1386,13 +1634,13 @@ public class HomeScreenController implements Initializable {
 
                 List <WpPostMeta> myChangeList = new ArrayList<>();
                 List<WpPostMeta> updateList = new ArrayList<>();
-                List<DefaultPrices> defaultPricesList = dbOperations.getAllDefaultPrices();
-                System.out.println("defaultPricesList\n"+defaultPricesList);
+                List<UpdateProduct> updateProductList = tvAvailableItem.getItems();
+                System.out.println("defaultPricesList\n"+updateProductList);
 
 
-                for (DefaultPrices dP : defaultPricesList) {
+                for (UpdateProduct dP : updateProductList) {
                     List<WpPostMeta> wpPostMetas = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getGameID(), "_price","_regular_price");
-                    if (dP.getEditionID() != null) {
+                    if (!String.valueOf(dP.getEditionID()).isEmpty()) {
                         System.out.println("Have Edition!");
                         wpPostMetas.addAll(dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getEditionID(), "_price","_regular_price"));
 
@@ -1408,25 +1656,10 @@ public class HomeScreenController implements Initializable {
                                     //گرفتن _price بازی که برای این ادیشن تعریف شده
                                     WpPostMeta pM;
                                     pM = wpPostMetas.stream().filter(wpPostMeta -> wpPostMeta.getPostId()==dP.getGameID() && wpPostMeta.getMetaValue().equals(postMeta.getMetaValue())).findFirst().get();
-                                    float price;
-                                    if (Double.parseDouble(dP.getPrice()) < 10) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else if (Double.parseDouble(dP.getPrice()) < 20) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else if (Double.parseDouble(dP.getPrice()) < 40) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    }
-
                                     myChangeList.add(pM);
-                                    System.out.println(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                                    System.out.println(dP.getPriceToman());
                                     for(WpPostMeta wp : myChangeList){
-                                        wp.setMetaValue(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                                        wp.setMetaValue(dP.getPriceToman());
                                     }
                                     updateList.addAll(myChangeList);
                                     myChangeList.clear();
@@ -1441,24 +1674,10 @@ public class HomeScreenController implements Initializable {
 
                                 // برای گرفتن _price و _regular_price بازی در لیست myChangeList
                                 if (myChangeList.size()==2){
-                                    float price;
-                                    if (Double.parseDouble(dP.getPrice()) < 10) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.2 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else if (Double.parseDouble(dP.getPrice()) < 20) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.15 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else if (Double.parseDouble(dP.getPrice()) < 40) {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.1 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    } else {
-                                        price = Math.round(Float.parseFloat(dP.getPrice()) * 1.07 * (Float.parseFloat(tfDollarPrice.getText()) / 1000));
-                                        price = price * 1000;
-                                    }
 
-                                    System.out.println(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                                    System.out.println(dP.getPriceToman());
                                     for(WpPostMeta wp : myChangeList){
-                                        wp.setMetaValue(Float.toString(price).substring(0,Float.toString(price).indexOf(".")));
+                                        wp.setMetaValue(dP.getPriceToman());
                                     }
                                     updateList.addAll(myChangeList);
                                     myChangeList.clear();
@@ -1480,19 +1699,6 @@ public class HomeScreenController implements Initializable {
 
             }
         }).start();
-
-    }
-
-    public void cancelUpdateSitePrices(ActionEvent actionEvent) {
-
-        spUpdateSitePrices.setVisible(false);
-        tfDollarPrice.setText("");
-        tfDollarPrice.setPromptText("");
-
-    }
-
-    public void updateSitePrices(ActionEvent actionEvent) {
-        spUpdateSitePrices.setVisible(true);
     }
 }
 
