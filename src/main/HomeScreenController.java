@@ -62,9 +62,9 @@ public class HomeScreenController implements Initializable {
     public JFXToggleButton tbActiveGame;
 
     public Games editGame;
-    public List<String> availableGameName = new ArrayList<>();
+    public List<Games> noneEditGames = new ArrayList<>();
 
-    public ObservableList<Games> games = FXCollections.observableArrayList();
+    public List<Games> games = new ArrayList<>();
 
     public ObservableList<GamesList> gamesList = FXCollections.observableArrayList();
     public ObservableList<SaleType> saleTypeList = FXCollections.observableArrayList();
@@ -119,6 +119,8 @@ public class HomeScreenController implements Initializable {
     public JFXToggleButton tbPriceType;
     public Label lblPriceType;
     public UpdateProduct updateProductInstance = null;
+    public TextField tfEditPostId;
+    public Label lblEditIdError;
 
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -228,7 +230,6 @@ public class HomeScreenController implements Initializable {
         lvGameList.getItems().clear();
         for (Games g : games) {
             lvGameList.getItems().add(g.getName());
-            availableGameName.add(g.getName());
         }
     }
 
@@ -693,9 +694,13 @@ public class HomeScreenController implements Initializable {
             spEditGame.setVisible(true);
             editGame = games.stream().filter(games1 -> games1.getName().equals(lvGameList.getSelectionModel().getSelectedItem().toString())).findFirst().get();
 
-            availableGameName.remove(editGame.getName());
+            noneEditGames.clear();
+            for (Games g : games){
+                if (g != editGame) noneEditGames.add(g);
+            }
 
             tfEditName.setText(editGame.getName());
+            tfEditPostId.setText(String.valueOf(editGame.getPostId()));
             tfEditPlati.setText(editGame.getPlatiURL());
             tfSteamDBURL.setText(editGame.getSteamDBURL());
             tbActiveGame.selectedProperty().setValue(editGame.isActive());
@@ -744,23 +749,35 @@ public class HomeScreenController implements Initializable {
 
     public void OkEdit(ActionEvent actionEvent) {
 
-        String oldName = editGame.getName();
         String oldPlati = editGame.getPlatiURL();
         String oldSteam = editGame.getSteamDBURL();
 
         boolean name = false;
         boolean url = false;
+        boolean Id = false;
 
-        if (!tfEditName.getText().isEmpty() && !availableGameName.stream().filter(o -> o.toLowerCase().equals(tfEditName.getText().toLowerCase())).findFirst().isPresent() && !oldName.equals(tfEditName.getText())) {
+        if (!tfEditName.getText().isEmpty() && !noneEditGames.stream().filter(o -> o.getName().toLowerCase().equals(tfEditName.getText().toLowerCase())).findAny().isPresent())  {
             editGame.setName(tfEditName.getText());
             lblEditNameError.setText("");
             name = true;
         } else if (tfEditName.getText().isEmpty()) {
             lblEditNameError.setText("نام بازی را وارد کنید");
             name = false;
-        } else if (availableGameName.stream().filter(o -> o.toLowerCase().equals(tfEditName.getText().toLowerCase())).findFirst().isPresent()) {
+        } else if (noneEditGames.stream().anyMatch(o -> o.getName().toLowerCase().equals(tfEditName.getText().toLowerCase()))) {
             lblEditNameError.setText("نام بازی تکراری است");
             name = false;
+        }
+
+        if (!tfEditPostId.getText().isEmpty() && noneEditGames.stream().noneMatch(o -> String.valueOf(o.getPostId()).equals(tfEditPostId.getText()))) {
+            editGame.setPostId(Long.parseLong(tfEditPostId.getText()));
+            lblEditIdError.setText("");
+            Id = true;
+        } else if (tfEditPostId.getText().isEmpty()) {
+            lblEditIdError.setText("آیدی را وارد کنید");
+            Id = false;
+        } else if (noneEditGames.stream().anyMatch(o -> String.valueOf(o.getPostId()).equals(tfEditPostId.getText()))) {
+            lblEditIdError.setText("آیدی تکراری است");
+            Id = false;
         }
 
         if (!tfEditPlati.getText().isEmpty() && !tfEditSteamDb.getText().isEmpty() && (!oldPlati.equals(tfEditPlati.getText()) || !oldSteam.equals(tfEditSteamDb.getText()))) {
@@ -775,19 +792,17 @@ public class HomeScreenController implements Initializable {
             url = false;
         }
 
-        if (name || url) {
+        if (name && url && Id) {
             new Thread(() -> {
                 dbOperations.update(editGame);
                 editGame = null;
-                Platform.runLater(() -> updateGamesList());
+                Platform.runLater(this::updateGamesList);
             }).start();
             spEditGame.setVisible(false);
             tfEditName.setText("");
             tfEditPlati.setText("");
             tfSteamDBURL.setText("");
             tfSteamDBURL.setText("");
-        } else {
-            cancelEdit(null);
         }
 
     }
@@ -795,9 +810,14 @@ public class HomeScreenController implements Initializable {
     public void cancelEdit(ActionEvent actionEvent) {
         spEditGame.setVisible(false);
         tfEditName.setText("");
+        tfEditPostId.setText("");
         tfEditPlati.setText("");
         tfSteamDBURL.setText("");
         tfSteamDBURL.setText("");
+        lblEditNameError.setText("");
+        lblEditIdError.setText("");
+        lblEditPlatiError.setText("");
+        lblEditSteamError.setText("");
     }
 
     public void updateAllPrices(ActionEvent actionEvent) {
@@ -1448,7 +1468,6 @@ public class HomeScreenController implements Initializable {
 
     public void updateAllSitePrices(ActionEvent actionEvent) {
 
-        //TODO: تنظیم آیتم های ناموجود و موجود در جدول هایشان
         List<Games> games = dbOperations.getAllGames();
         List<DefaultPrices> dP = dbOperations.getAllDefaultPrices();
 

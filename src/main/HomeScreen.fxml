@@ -336,14 +336,16 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <StackPane fx:id="spEditGame" style="-fx-background-color: rgba(0,0,0,0.5);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="spEditGame" style="-fx-background-color: rgba(0,0,0,0.5);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <AnchorPane maxHeight="415.0" maxWidth="400.0" prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                <children>
                   <Label text="Name:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="20.0" />
+                  <Label text="Post ID:" AnchorPane.leftAnchor="270.0" AnchorPane.topAnchor="20.0" />
                   <Label layoutX="20.0" layoutY="30.0" text="Plati Link:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="120.0" />
                   <Label layoutX="30.0" layoutY="130.0" text="Steam Db Link:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="220.0" />
-                  <TextField fx:id="tfEditName" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0" />
+                  <TextField fx:id="tfEditName" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="50.0" />
+                  <TextField fx:id="tfEditPostId" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0" />
                   <TextField fx:id="tfEditPlati" layoutX="20.0" layoutY="70.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="150.0" />
                   <TextField fx:id="tfEditSteamDb" layoutX="30.0" layoutY="170.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="250.0" />
                   <JFXButton focusTraversable="false" maxHeight="30.0" minHeight="30.0" onAction="#OkEdit" prefWidth="185.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Ok" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0">
@@ -357,7 +359,8 @@
                      </padding>
                   </JFXButton>
                   <JFXToggleButton fx:id="tbActiveGame" layoutX="14.0" layoutY="288.0" maxHeight="40.0" minHeight="40.0" text="Active/DeActive Game" toggleColor="WHITE" toggleLineColor="#1adc01" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="315.0" />
-                  <Label fx:id="lblEditNameError" alignment="CENTER" layoutX="181.0" layoutY="95.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
+                  <Label fx:id="lblEditNameError" alignment="CENTER" layoutX="181.0" layoutY="95.0" textFill="RED" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="90.0" />
+                  <Label fx:id="lblEditIdError" alignment="CENTER" layoutX="25.0" layoutY="100.0" textFill="RED" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="90.0" />
                   <Label fx:id="lblEditPlatiError" alignment="CENTER" layoutX="10.0" layoutY="100.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="190.0" />
                   <Label fx:id="lblEditSteamError" alignment="CENTER" layoutX="20.0" layoutY="110.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="290.0" />
                </children>
@@ -369,9 +372,11 @@
             <AnchorPane maxHeight="415.0" maxWidth="400.0" prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                <children>
                   <Label text="Name:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="20.0" />
+                  <Label layoutX="27.0" layoutY="30.0" text="Post ID:" AnchorPane.leftAnchor="270.0" AnchorPane.topAnchor="20.0" />
                   <Label layoutX="20.0" layoutY="30.0" text="Plati Link:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="120.0" />
                   <Label layoutX="30.0" layoutY="130.0" text="Steam Db Link:" AnchorPane.leftAnchor="17.0" AnchorPane.topAnchor="220.0" />
                   <TextField fx:id="tfTitle" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="50.0" />
+                  <TextField fx:id="tfPostId" layoutX="25.0" layoutY="60.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0" />
                   <TextField fx:id="tfPlatiURL" layoutX="20.0" layoutY="70.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="150.0" />
                   <TextField fx:id="tfSteamDBURL" layoutX="30.0" layoutY="170.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="250.0" />
                   <JFXButton focusTraversable="false" maxHeight="30.0" minHeight="30.0" onAction="#addGame" prefWidth="185.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Ok" textFill="WHITE" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0">
@@ -388,8 +393,6 @@
                   <Label fx:id="lblNameError" alignment="CENTER" layoutX="181.0" layoutY="95.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
                   <Label fx:id="lblPlatiError" alignment="CENTER" layoutX="10.0" layoutY="100.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="190.0" />
                   <Label fx:id="lblSteamError" alignment="CENTER" layoutX="20.0" layoutY="110.0" textFill="RED" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="290.0" />
-                  <Label layoutX="27.0" layoutY="30.0" text="Post ID:" AnchorPane.leftAnchor="270.0" AnchorPane.topAnchor="20.0" />
-                  <TextField fx:id="tfPostId" layoutX="25.0" layoutY="60.0" style="-fx-background-color: transparent; -fx-border-color: #999999; -fx-border-width: 0.4; -fx-border-radius: 5; -fx-prompt-text-fill: red;" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0" />
                </children>
             </AnchorPane>
          </children>
@@ -464,7 +467,7 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <StackPane fx:id="spUpdateSitePrices" layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: rgba(0,0,0,0.5);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="spUpdateSitePrices" layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: rgba(0,0,0,0.5);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <AnchorPane maxHeight="200.0" maxWidth="400.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 10;" visible="false" />
             <AnchorPane maxWidth="700.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-background-radius: 20 20 10 10;">
