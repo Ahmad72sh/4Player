@@ -1652,23 +1652,32 @@ public class HomeScreenController implements Initializable {
                 });
 
                 List <WpPostMeta> myChangeList = new ArrayList<>();
-                List<WpPostMeta> updateList = new ArrayList<>();
-                List<UpdateProduct> updateProductList = tvAvailableItem.getItems();
-                System.out.println("defaultPricesList\n"+updateProductList);
+                List <WpPostMeta> updateList = new ArrayList<>();
+                List <UpdateProduct> updateProductListAvailable = tvAvailableItem.getItems();
+                List <UpdateProduct> updateProductListUnavailable = tvUnavailableItem.getItems();
+                System.out.println("defaultPricesList\n"+updateProductListAvailable);
 
-
-                for (UpdateProduct dP : updateProductList) {
+                for (UpdateProduct dP : updateProductListAvailable) {
                     List<WpPostMeta> wpPostMetas = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getGameID(), "_price","_regular_price");
+
+                    //گرفتن حالت موجود و موجود نبودن ادیشن در انبار
+                    List<WpPostMeta> wpPostMetasAvailable = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getGameID(), "_stock_status");
+
                     if (!String.valueOf(dP.getEditionID()).isEmpty()) {
                         System.out.println("Have Edition!");
                         wpPostMetas.addAll(dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getEditionID(), "_price","_regular_price"));
-
+                        //گرفتن حالت موجود و موجود نبودن ادیشن در انبار
+                        wpPostMetasAvailable.addAll(dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getEditionID(), "_stock_status"));
 
                         for (WpPostMeta postMeta : wpPostMetas) {
 
                             if (postMeta.getPostId() == dP.getEditionID()) {
 
+                                //موجود کردن ادیشن در انبار
+                                WpPostMeta pMAvailableEdition = wpPostMetasAvailable.stream().filter(wpPostMeta -> wpPostMeta.getPostId() == dP.getEditionID()).findFirst().get();
+                                pMAvailableEdition.setMetaValue("instock");
                                 myChangeList.add(postMeta);
+                                updateList.add(pMAvailableEdition);
 
                                 // برای گرفتن _price و _regular_price ادیشن در لیست myChangeList
                                 if (myChangeList.size()==2){
@@ -1676,6 +1685,9 @@ public class HomeScreenController implements Initializable {
                                     WpPostMeta pM;
                                     pM = wpPostMetas.stream().filter(wpPostMeta -> wpPostMeta.getPostId()==dP.getGameID() && wpPostMeta.getMetaValue().equals(postMeta.getMetaValue())).findFirst().get();
                                     myChangeList.add(pM);
+                                    WpPostMeta pMAvailableGame = wpPostMetasAvailable.stream().filter(wpPostMeta -> wpPostMeta.getPostId() == dP.getGameID()).findFirst().get();
+                                    pMAvailableGame.setMetaValue("instock");
+                                    updateList.add(pMAvailableGame);
                                     System.out.println(dP.getPriceToman());
                                     for(WpPostMeta wp : myChangeList){
                                         wp.setMetaValue(dP.getPriceToman());
@@ -1694,10 +1706,15 @@ public class HomeScreenController implements Initializable {
                                 // برای گرفتن _price و _regular_price بازی در لیست myChangeList
                                 if (myChangeList.size()==2){
 
+                                    //موجود کردن بازی در انبار
+                                    WpPostMeta pMAvailableGame = wpPostMetasAvailable.stream().filter(wpPostMeta -> wpPostMeta.getPostId() == dP.getGameID()).findFirst().get();
+                                    pMAvailableGame.setMetaValue("instock");
+                                    updateList.add(pMAvailableGame);
                                     System.out.println(dP.getPriceToman());
                                     for(WpPostMeta wp : myChangeList){
                                         wp.setMetaValue(dP.getPriceToman());
                                     }
+
                                     updateList.addAll(myChangeList);
                                     myChangeList.clear();
 
@@ -1705,6 +1722,36 @@ public class HomeScreenController implements Initializable {
                             }
                         }
                     }
+                }
+
+                //تغییر حالت آیتم های ناموجود در انبار
+                List <String> a = new ArrayList<>();
+                for (UpdateProduct dP : updateProductListUnavailable) {
+
+                    if (!String.valueOf(dP.getEditionID()).isEmpty()) {
+                        System.out.println("Its AN EDITION !!!");
+                        a.add(String.valueOf(dP.getGameID()));
+                        Games games = dbOperations.getGameByName(dP.getGameName().getText());
+                        if (games.getEditionList().size()== a.stream().filter(str -> str.equals(String.valueOf(games.getPostId()))).count()){
+                            System.out.println("ALL EDITIONS UNAVAILABLE !!!");
+                            List <WpPostMeta> wpPostMetas = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getGameID(), "_stock_status");
+                            wpPostMetas.addAll(dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getEditionID(), "_stock_status"));
+                            for (WpPostMeta wPM:wpPostMetas){
+                                wPM.setMetaValue("outofstock");
+                                updateList.add(wPM);
+                            }
+                        } else {
+                            WpPostMeta wpPostMetas = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getEditionID(), "_stock_status").get(0);
+                            wpPostMetas.setMetaValue("outofstock");
+                            updateList.add(wpPostMetas);
+                        }
+
+                    } else {
+                        WpPostMeta wpPostMetas = dbOperations.getWpPostMetaByPostIDAndMetaKey(dP.getGameID(), "_stock_status").get(0);
+                        wpPostMetas.setMetaValue("outofstock");
+                        updateList.add(wpPostMetas);
+                    }
+
                 }
 
                 dbOperations.update(updateList);
