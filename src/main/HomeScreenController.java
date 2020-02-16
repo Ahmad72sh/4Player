@@ -70,9 +70,9 @@ public class HomeScreenController implements Initializable {
 
     public ObservableList<GamesList> gamesList = FXCollections.observableArrayList();
     public ObservableList<SaleType> saleTypeList = FXCollections.observableArrayList();
-    public ObservableList<String> filteredLangList = FXCollections.observableArrayList();
+    public ObservableList<Language> deActiveLangList = FXCollections.observableArrayList();
     public ObservableList<String> kindList = FXCollections.observableArrayList();
-    public ObservableList<String> langList = FXCollections.observableArrayList();
+    public ObservableList<Language> langList = FXCollections.observableArrayList();
     public ObservableList<String> platformList = FXCollections.observableArrayList();
     public ObservableList<String> regionList = FXCollections.observableArrayList();
     public VBox vBoxGamesDetails;
@@ -85,7 +85,6 @@ public class HomeScreenController implements Initializable {
     public ListView lvGameList;
     public ListView lvKind;
     public ListView lvRegion;
-    public ListView lvFilteredLanguage;
     public TextField tfAddContent;
     public StackPane spAddContent;
     public StackPane spEditContent;
@@ -126,7 +125,6 @@ public class HomeScreenController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
 
-        updateFilteredLangList();
         updateKindList();
         updateLanguageList();
         updatePlatformList();
@@ -254,12 +252,6 @@ public class HomeScreenController implements Initializable {
         }
     }
 
-    private void updateFilteredLangList() {
-        filteredLangList.clear();
-        filteredLangList.addAll(dbOperations.getAllFilteredLanguage());
-        lvFilteredLanguage.getItems().clear();
-        lvFilteredLanguage.getItems().addAll(filteredLangList);
-    }
 
     private void updateKindList() {
         kindList.clear();
@@ -271,8 +263,38 @@ public class HomeScreenController implements Initializable {
     private void updateLanguageList() {
         langList.clear();
         langList.addAll(dbOperations.getAllLanguage());
+        for (Language lg : langList){
+            if (!lg.isActive()) deActiveLangList.add(lg);
+        }
+
         lvLanguage.getItems().clear();
-        lvLanguage.getItems().addAll(langList);
+        for (Language lg : langList) {
+            HBox hBox= new HBox();
+            JFXToggleButton toggleBtn = new JFXToggleButton();
+            toggleBtn.setFocusTraversable(false);
+            toggleBtn.setMinHeight(30);
+            toggleBtn.setMaxHeight(30);
+            toggleBtn.setToggleColor(Color.WHITE);
+            toggleBtn.setToggleLineColor(Color.valueOf("3ed35e"));
+            toggleBtn.setSelected(lg.isActive());
+            toggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                hBox.setDisable(true);
+                lg.setActive(newValue);
+                if (newValue){
+                    deActiveLangList.remove(lg);
+                } else {
+                    deActiveLangList.add(lg);
+                }
+                dbOperations.update(lg);
+                hBox.setDisable(false);
+            });
+            Label lbl = new Label(lg.getName());
+            hBox.getChildren().addAll(lbl,toggleBtn);
+            lbl.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lbl, Priority.ALWAYS);
+            hBox.setAlignment(Pos.CENTER);
+            lvLanguage.getItems().add(hBox);
+        }
     }
 
     private void updatePlatformList() {
@@ -316,7 +338,6 @@ public class HomeScreenController implements Initializable {
 
 
         jfxDialogLayout.setActions(button);
-//        myDialog.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         myDialog.show();
     }
 
@@ -528,9 +549,19 @@ public class HomeScreenController implements Initializable {
                         colRegion.setMinWidth(120);
                         colRegion.setId("colRegion");
 
-                        langList.addListener((ListChangeListener<String>) c -> colLanguage.setCellFactory(ComboBoxTableCell.forTableColumn(langList)));
+                        langList.addListener((ListChangeListener<Language>) c -> {
+                            ObservableList<String> langListString = FXCollections.observableArrayList();
+                            for (Language lang: langList){
+                                langListString.add(lang.getName());
+                            }
+                            colLanguage.setCellFactory(ComboBoxTableCell.forTableColumn(langListString));
+                        });
                         colLanguage.setCellValueFactory(param -> param.getValue().Language);
-                        colLanguage.setCellFactory(ComboBoxTableCell.forTableColumn(langList));
+                        ObservableList<String> langListString = FXCollections.observableArrayList();
+                        for (Language lang: langList){
+                            langListString.add(lang.getName());
+                        }
+                        colLanguage.setCellFactory(ComboBoxTableCell.forTableColumn(langListString));
                         colLanguage.setOnEditCommit(event -> tableObjectTableView.getItems().get(event.getTablePosition().getRow()).setLanguage(event.getNewValue()));
                         colLanguage.setMaxWidth(120);
                         colLanguage.setMinWidth(120);
@@ -632,7 +663,7 @@ public class HomeScreenController implements Initializable {
                                 gameTableObject.setSetDefault(pl.isDefaultForSale());
 
 
-                                if (filteredLangList.contains(pl.getLanguage())) {
+                                if (deActiveLangList.stream().anyMatch(language -> language.getName().equals(pl.getLanguage()))) {
                                     gameTableObjects.add(gameTableObject);
                                 } else {
                                     gameTableObjectsWithoutFLang.add(gameTableObject);
@@ -1132,71 +1163,12 @@ public class HomeScreenController implements Initializable {
         }
     }
 
-    public void addFilteredLanguage(ActionEvent actionEvent) {
-        addState = "FilteredLanguage";
-        spAddContent.setVisible(true);
-    }
-
-    public void editFilteredLanguage(ActionEvent actionEvent) {
-        if (!lvFilteredLanguage.getSelectionModel().isEmpty()) {
-            editState = "FilteredLanguage";
-            spEditContent.setVisible(true);
-            tfEditContent.setText(lvFilteredLanguage.getSelectionModel().getSelectedItem().toString());
-        } else {
-            dialogBox(spSetting, "Error !!!", "Choose an item first.");
-        }
-    }
-
-    public void deleteFilteredLanguage(ActionEvent actionEvent) {
-        if (!lvFilteredLanguage.getSelectionModel().isEmpty()) {
-            JFXDialogLayout jfxDialogLayout = new JFXDialogLayout();
-            JFXDialog myDialog = new JFXDialog(spSetting, jfxDialogLayout, JFXDialog.DialogTransition.CENTER);
-            myDialog.transitionTypeProperty().set(JFXDialog.DialogTransition.NONE);
-            Text dialogTitle = new Text("Delete Filtered Language!");
-            dialogTitle.setStyle("-fx-font-weight: bold !important; -fx-font-size: 18");
-            jfxDialogLayout.setHeading(dialogTitle);
-            jfxDialogLayout.setBody(new Text("Are you sure to delete \"" + lvFilteredLanguage.getSelectionModel().getSelectedItem().toString() + "\" ?"));
-            JFXButton button = new JFXButton("Cancel");
-            button.setStyle("-fx-font-weight: bold !important;" +
-                    "-fx-text-fill: #0096c9;" +
-                    "-fx-pref-width: 70;");
-            button.setOnAction(event -> myDialog.close());
-            JFXButton btnDelete = new JFXButton("Delete");
-            btnDelete.setStyle("-fx-font-weight: bold !important;" +
-                    "-fx-text-fill: #FF4800;" +
-                    "-fx-pref-width: 70;");
-            btnDelete.setOnAction(event -> new Thread(() -> {
-                Platform.runLater(() -> myDialog.close());
-                FilteredLanguage g = dbOperations.getFilteredLanguageByName(lvFilteredLanguage.getSelectionModel().getSelectedItem().toString());
-                dbOperations.deleteFilteredLanguage(g.getId());
-                Platform.runLater(() -> updateFilteredLangList());
-            }).start());
-            jfxDialogLayout.setActions(button, btnDelete);
-            myDialog.show();
-
-        } else {
-            dialogBox(spSetting, "Error !!!", "Choose an item first.");
-        }
-    }
-
     public void addNewContent(ActionEvent actionEvent) {
 
         new Thread(() -> {
 
             Platform.runLater(() -> spAddContent.setVisible(false));
             switch (addState) {
-                case "FilteredLanguage":
-                    FilteredLanguage filteredLanguage = new FilteredLanguage();
-                    filteredLanguage.setName(tfAddContent.getText());
-                    try {
-                        dbOperations.add(filteredLanguage);
-                        Platform.runLater(() -> lvFilteredLanguage.getItems().add(tfAddContent.getText()));
-                        filteredLangList.add(tfAddContent.getText());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    break;
                 case "Kind":
                     Kind kind = new Kind();
                     kind.setName(tfAddContent.getText());
@@ -1212,10 +1184,10 @@ public class HomeScreenController implements Initializable {
                 case "Language":
                     Language language = new Language();
                     language.setName(tfAddContent.getText());
+                    language.setActive(true);
                     try {
                         dbOperations.add(language);
-                        Platform.runLater(() -> lvLanguage.getItems().add(tfAddContent.getText()));
-                        langList.add(tfAddContent.getText());
+                        Platform.runLater(() -> updateLanguageList());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -1268,17 +1240,6 @@ public class HomeScreenController implements Initializable {
         new Thread(() -> {
             Platform.runLater(() -> spEditContent.setVisible(false));
             switch (editState) {
-                case "FilteredLanguage":
-                    FilteredLanguage filteredLanguage = dbOperations.getFilteredLanguageByName(lvFilteredLanguage.getSelectionModel().getSelectedItem().toString());
-                    filteredLanguage.setName(tfEditContent.getText());
-                    try {
-                        dbOperations.update(filteredLanguage);
-                        Platform.runLater(this::updateFilteredLangList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    break;
                 case "Kind":
                     Kind kind = dbOperations.getKindByName(lvKind.getSelectionModel().getSelectedItem().toString());
                     kind.setName(tfEditContent.getText());

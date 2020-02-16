@@ -16,6 +16,7 @@ public class Language {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String Name;
+    private Boolean isActive;
 
     public Integer getId() {
         return id;
@@ -31,5 +32,13 @@ public class Language {
 
     public void setName(String name) {
         Name = name;
+    }
+
+    public Boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean filtered) {
+        isActive = filtered;
     }
 }

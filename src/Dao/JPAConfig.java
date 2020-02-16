@@ -35,9 +35,9 @@ public class JPAConfig
 
         //4Player Site
 //        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-//        dataSource.setUrl("jdbc:mysql://lh160.irandns.com:3306/playerir_pricev1");
-//        dataSource.setUsername("playerir_ahmad");
-//        dataSource.setPassword("4PXvPf8w2");
+//        dataSource.setUrl("jdbc:mysql://lh140.irandns.com:3306/playerir_p4gshop");
+//        dataSource.setUsername("playerir_price");
+//        dataSource.setPassword("ubZfQwE80");
 
         //PHP My Admin
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");

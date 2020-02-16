@@ -20,7 +20,6 @@ public class DBOperations {
     WpPostmetaService wpPostmetaService = ctx.getBean(WpPostmetaService.class);
     SaleTypeService saleTypeService = ctx.getBean(SaleTypeService.class);
     EditionService editionService = ctx.getBean(EditionService.class);
-    FilteredLanguageService filteredLanguageService = ctx.getBean(FilteredLanguageService.class);
     KindService kindService = ctx.getBean(KindService.class);
     LanguageService languageService = ctx.getBean(LanguageService.class);
     PlatformService platformService = ctx.getBean(PlatformService.class);
@@ -164,29 +163,6 @@ public class DBOperations {
         return editionService.getByNameAndGameID(EditionName,gameService.getByName(GameName).getId());
     }
 
-    //----------------------------FilteredLanguage---------------------------------------
-
-    public ObservableList<String> getAllFilteredLanguage() {
-
-        ObservableList<String> List = FXCollections.observableArrayList();
-        for(FilteredLanguage filteredLanguage:filteredLanguageService.getAll()){
-            List.add(filteredLanguage.getName());
-        }
-        return List;
-    }
-
-    public FilteredLanguage add(FilteredLanguage filteredLanguage) throws Exception {
-
-        return filteredLanguageService.Add(filteredLanguage);
-    }
-
-    public void deleteFilteredLanguage(Integer id) {
-        filteredLanguageService.Remove(id);
-    }
-
-    public void update(FilteredLanguage filteredLanguage) { filteredLanguageService.Update(filteredLanguage); }
-
-    public FilteredLanguage getFilteredLanguageByName(String name) { return filteredLanguageService.getByName(name); }
 
     //----------------------------Kind---------------------------------------
 
@@ -214,14 +190,8 @@ public class DBOperations {
 
     //----------------------------Language---------------------------------------
 
-    public ObservableList<String> getAllLanguage() {
-
-        ObservableList<String> List = FXCollections.observableArrayList();
-        for(Language language:languageService.getAll()){
-            List.add(language.getName());
-        }
-        return List;
-
+    public List<Language> getAllLanguage() {
+        return languageService.getAll();
     }
 
     public Language add(Language language) throws Exception {
