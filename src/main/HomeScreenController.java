@@ -353,14 +353,18 @@ public class HomeScreenController implements Initializable {
             gamesList.clear();
             saleTypeList.clear();
             saleTypeList.addAll(dbOperations.getAllSaleType());
-            for (Games g : games) {
+
+            List <Games> activGames = new ArrayList<>();
+            for (Games game : dbOperations.getAllGames()) {
+                if (game.isActive()) activGames.add(game);
+            }
+
+            for (Games g : activGames) {
                 gamesList.add(new GamesList(g.getName(), Integer.toString(g.getId()), g.getPlatiURL(), g.getSteamDBURL(), g.getPostId()));
-//            }
-//            for (GamesList gL : gamesList) {
+
 
 
                 GamesList gL = new GamesList(g.getName(), Integer.toString(g.getId()), g.getPlatiURL(), g.getSteamDBURL(), g.getPostId());
-//                List<EditionName> editions = dbOperations.getEditionByGameId(Integer.parseInt(gL.GameId.get()));
                 List<Edition> editions = g.getEditionList();
                 ObservableList<String> editionList = FXCollections.observableArrayList();
                 for (Edition edition : editions) {
@@ -739,7 +743,9 @@ public class HomeScreenController implements Initializable {
         Text dialogTitle = new Text("Delete Game!");
         dialogTitle.setStyle("-fx-font-weight: bold !important; -fx-font-size: 18");
         jfxDialogLayout.setHeading(dialogTitle);
-        jfxDialogLayout.setBody(new Text("Are you sure to delete \"" + lvGameList.getSelectionModel().getSelectedItem().toString() + "\" ?"));
+        HBox hBox = (HBox) lvGameList.getSelectionModel().getSelectedItem();
+        Label lbl = (Label) hBox.getChildren().get(0);
+        jfxDialogLayout.setBody(new Text("Are you sure to delete \"" + lbl.getText() + "\" ?"));
         JFXButton button = new JFXButton("Cancel");
         button.setStyle("-fx-font-weight: bold !important;" +
                 "-fx-text-fill: #0096c9;" +
@@ -752,12 +758,9 @@ public class HomeScreenController implements Initializable {
         btnDelete.setOnAction(event -> {
             new Thread(() -> {
 
-                Games g = games.stream().filter(games1 -> games1.getName().equals(lvGameList.getSelectionModel().getSelectedItem().toString())).findAny().get();
+                Games g = games.stream().filter(games1 -> games1.getName().equals(lbl.getText())).findAny().get();
                 dbOperations.deleteGame(g.getId());
-                Platform.runLater(() -> {
-                    updateGamesList();
-                });
-
+                Platform.runLater(() -> updateGamesList());
             }).start();
             myDialog.close();
 
@@ -776,7 +779,6 @@ public class HomeScreenController implements Initializable {
         boolean name = false;
         boolean url = false;
         boolean Id = false;
-        //TODO: درست کردن قسمت ادیت و رفع تمامی مشکلات
         if (!tfEditName.getText().isEmpty() && noneEditGames.stream().noneMatch(o -> o.getName().toLowerCase().equals(tfEditName.getText().toLowerCase())))  {
             editGame.setName(tfEditName.getText());
             lblEditNameError.setText("");
@@ -845,6 +847,8 @@ public class HomeScreenController implements Initializable {
     }
 
     public void updateAllPrices(ActionEvent actionEvent) {
+
+        // TODO: تغییر متد ذخیره اطلاعات آیتم ها و پاک نکردن اطلاعات بازی های غیر فعال
         new Thread(() -> {
             List<PriceLists> priceLists = new ArrayList<>();
             List<DefaultPrices> defaultPrices = new ArrayList<>();
@@ -1474,11 +1478,13 @@ public class HomeScreenController implements Initializable {
 
         if (!lvGameList.getSelectionModel().isEmpty()) {
             new Thread(() -> {
+                HBox hBox = (HBox) lvGameList.getSelectionModel().getSelectedItem();
+                Label lbl = (Label) hBox.getChildren().get(0);
                 Platform.runLater(() -> {
                     spAddEdition.setVisible(true);
-                    lblGameNameForEdition.setText(lvGameList.getSelectionModel().getSelectedItem().toString());
+                    lblGameNameForEdition.setText(lbl.getText());
                 });
-                for (Edition ed : dbOperations.getEditionByGameName(lvGameList.getSelectionModel().getSelectedItem().toString())) {
+                for (Edition ed : dbOperations.getEditionByGameName(lbl.getText())) {
                     Platform.runLater(() -> tvEdition.getItems().add(new EditionObject(ed.getName(), ed.getPostId().toString())));
                 }
             }).start();
@@ -1492,12 +1498,17 @@ public class HomeScreenController implements Initializable {
 
     public void updateAllSitePrices(ActionEvent actionEvent) {
 
-        List<Games> games = dbOperations.getAllGames();
+        List<Games> activeGames = new ArrayList<>();
+
+        for (Games game: dbOperations.getAllGames()){
+            if (game.isActive()) activeGames.add(game);
+        }
+
         List<DefaultPrices> dP = dbOperations.getAllDefaultPrices();
 
         tvAvailableItem.getItems().clear();
         tvUnavailableItem.getItems().clear();
-        for (Games game : games) {
+        for (Games game : activeGames) {
             // اگر بازی در لیست قیمت های موجود قرار داشت
             if (dP.stream().anyMatch(defaultPrices -> defaultPrices.getGameID().equals(game.getPostId()))) {
                 // اگر بازی در لیست قیمت بود ولی دارای ادیشن نبود
