@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -42,15 +43,24 @@
             <JFXButton focusTraversable="false" layoutX="523.0" layoutY="560.0" maxHeight="31.0" minHeight="31.0" minWidth="140.0" onAction="#getGamePrice" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Show New Prices" textFill="WHITE" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="520.0">
                <padding>
                   <Insets top="-1.0" />
-               </padding></JFXButton>
+               </padding>
+               <tooltip>
+                  <Tooltip text="Get all price of active games from plati " />
+               </tooltip></JFXButton>
             <JFXButton focusTraversable="false" layoutX="323.0" layoutY="557.0" maxHeight="31.0" minHeight="31.0" onAction="#updateAllPrices" prefWidth="270.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Update All Prices &amp; Items Info" textFill="WHITE" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="240.0">
                <padding>
                   <Insets top="-1.0" />
-               </padding></JFXButton>
+               </padding>
+               <tooltip>
+                  <Tooltip text="Save all plati items and default for sale items in internal table" />
+               </tooltip></JFXButton>
             <JFXButton focusTraversable="false" layoutX="10.0" layoutY="10.0" maxHeight="31.0" minHeight="31.0" onAction="#updateSitePrices" prefWidth="220.0" style="-fx-background-color: #0099FF; -fx-background-radius: 20;" text="Update Site Prices!!!" textFill="WHITE" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
                <padding>
                   <Insets top="-1.0" />
-               </padding></JFXButton>
+               </padding>
+               <tooltip>
+                  <Tooltip text="Edite price and Un/Availables items  saved in intenal table and update website prices." wrapText="true" />
+               </tooltip></JFXButton>
          </children>
       </AnchorPane>
       <StackPane fx:id="spSetting" prefHeight="150.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -336,7 +346,7 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <StackPane fx:id="spEditGame" style="-fx-background-color: rgba(0,0,0,0.5);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="spEditGame" style="-fx-background-color: rgba(0,0,0,0.5);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <AnchorPane maxHeight="415.0" maxWidth="400.0" prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 10;">
                <children>

@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -25,6 +26,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import main.TableObjacts.*;
 import org.jsoup.Jsoup;
@@ -229,7 +231,26 @@ public class HomeScreenController implements Initializable {
         games.addAll(dbOperations.getAllGames());
         lvGameList.getItems().clear();
         for (Games g : games) {
-            lvGameList.getItems().add(g.getName());
+            HBox hBox= new HBox();
+            JFXToggleButton toggleBtn = new JFXToggleButton();
+            toggleBtn.setFocusTraversable(false);
+            toggleBtn.setMinHeight(30);
+            toggleBtn.setMaxHeight(30);
+            toggleBtn.setToggleColor(Color.WHITE);
+            toggleBtn.setToggleLineColor(Color.valueOf("3ed35e"));
+            toggleBtn.setSelected(g.isActive());
+            toggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                hBox.setDisable(true);
+                g.setActive(newValue);
+                dbOperations.update(g);
+                hBox.setDisable(false);
+            });
+            Label lbl = new Label(g.getName());
+            hBox.getChildren().addAll(lbl,toggleBtn);
+            lbl.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lbl, Priority.ALWAYS);
+            hBox.setAlignment(Pos.CENTER);
+            lvGameList.getItems().add(hBox);
         }
     }
 
@@ -692,13 +713,13 @@ public class HomeScreenController implements Initializable {
     public void editGame(ActionEvent actionEvent) {
         if (!lvGameList.getSelectionModel().isEmpty()) {
             spEditGame.setVisible(true);
-            editGame = games.stream().filter(games1 -> games1.getName().equals(lvGameList.getSelectionModel().getSelectedItem().toString())).findFirst().get();
-
+            HBox hbox = (HBox)lvGameList.getSelectionModel().getSelectedItem();
+            Label label = (Label) hbox.getChildren().get(0);
+            editGame = games.stream().filter(games1 -> games1.getName().equals(label.getText())).findFirst().get();
             noneEditGames.clear();
             for (Games g : games){
                 if (g != editGame) noneEditGames.add(g);
             }
-
             tfEditName.setText(editGame.getName());
             tfEditPostId.setText(String.valueOf(editGame.getPostId()));
             tfEditPlati.setText(editGame.getPlatiURL());
@@ -755,8 +776,8 @@ public class HomeScreenController implements Initializable {
         boolean name = false;
         boolean url = false;
         boolean Id = false;
-
-        if (!tfEditName.getText().isEmpty() && !noneEditGames.stream().filter(o -> o.getName().toLowerCase().equals(tfEditName.getText().toLowerCase())).findAny().isPresent())  {
+        //TODO: درست کردن قسمت ادیت و رفع تمامی مشکلات
+        if (!tfEditName.getText().isEmpty() && noneEditGames.stream().noneMatch(o -> o.getName().toLowerCase().equals(tfEditName.getText().toLowerCase())))  {
             editGame.setName(tfEditName.getText());
             lblEditNameError.setText("");
             name = true;
@@ -780,15 +801,18 @@ public class HomeScreenController implements Initializable {
             Id = false;
         }
 
-        if (!tfEditPlati.getText().isEmpty() && !tfEditSteamDb.getText().isEmpty() && (!oldPlati.equals(tfEditPlati.getText()) || !oldSteam.equals(tfEditSteamDb.getText()))) {
+        if (!tfEditPlati.getText().isEmpty() && noneEditGames.stream().noneMatch(games1 -> games1.getPlatiURL().equals(tfPlatiURL.getText()))) {
             editGame.setSteamDBURL(tfEditSteamDb.getText());
             editGame.setPlatiURL(tfEditPlati.getText());
             lblEditPlatiError.setText("");
             lblEditSteamError.setText("");
             url = true;
-        } else if (tfEditPlati.getText().isEmpty() && tfEditSteamDb.getText().isEmpty()) {
+        } else if (tfEditPlati.getText().isEmpty()) {
             lblEditPlatiError.setText("لینک Plati را وارد کنید");
-            lblEditSteamError.setText("لینک SteamDB را وارد کنید");
+//            lblEditSteamError.setText("لینک SteamDB را وارد کنید");
+            url = false;
+        } else if (noneEditGames.stream().anyMatch(games1 -> games1.getPlatiURL().equals(tfEditPlati.getText()))){
+            lblEditPlatiError.setText("لینک Plati تکراری است");
             url = false;
         }
 
@@ -1767,4 +1791,3 @@ public class HomeScreenController implements Initializable {
         }).start();
     }
 }
-
